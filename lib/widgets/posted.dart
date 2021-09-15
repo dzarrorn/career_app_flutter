@@ -1,16 +1,14 @@
+import 'package:career_app_flutter/models/job_model.dart';
 import 'package:career_app_flutter/pages/desc_page.dart';
 import 'package:career_app_flutter/theme.dart';
 import 'package:flutter/material.dart';
 
 class Posted extends StatelessWidget {
-  final String imageUrl;
-  final String title;
-  final String sub;
-  Posted({
-    this.imageUrl,
-    this.sub,
-    this.title,
-  });
+  // final String imageUrl;
+  // final String title;
+  // final String sub;
+  final JobModel job;
+  Posted(this.job);
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -26,15 +24,15 @@ class Posted extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DescPage(),
+                  builder: (context) => DescPage(job),
                 ),
               );
             },
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.asset(
-                  imageUrl,
+                Image.network(
+                  job.companyLogo,
                   width: 43.97,
                   height: 45,
                 ),
@@ -46,7 +44,7 @@ class Posted extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        job.name,
                         style: mediumBlack.copyWith(
                           fontSize: 16,
                         ),
@@ -55,7 +53,7 @@ class Posted extends StatelessWidget {
                         height: 2,
                       ),
                       Text(
-                        sub,
+                        job.companyName,
                         style: regulerGrey.copyWith(
                           fontSize: 14,
                         ),

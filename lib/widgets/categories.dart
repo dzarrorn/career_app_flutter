@@ -1,14 +1,13 @@
+import 'package:career_app_flutter/models/category_model.dart';
 import 'package:career_app_flutter/pages/detail_page.dart';
 import 'package:career_app_flutter/theme.dart';
 import 'package:flutter/material.dart';
 
 class Categories extends StatelessWidget {
-  final String text;
-  final String imageUrl;
-  Categories({
-    this.imageUrl,
-    this.text,
-  });
+  // final String text;
+  // final String imageUrl;
+  final CategoryModel category;
+  Categories(this.category);
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -16,10 +15,7 @@ class Categories extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailPage(
-              imageUrl: imageUrl,
-              jobDetail: text,
-            ),
+            builder: (context) => DetailPage(category),
           ),
         );
       },
@@ -35,12 +31,9 @@ class Categories extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.bottomLeft,
                     child: Padding(
-                      padding: EdgeInsets.only(
-                        left: 16,
-                        bottom: 16,
-                      ),
+                      padding: EdgeInsets.only(left: 16, bottom: 16, right: 16),
                       child: Text(
-                        text,
+                        category.name,
                         style: mediumWhite.copyWith(
                           fontSize: 18,
                         ),
@@ -48,7 +41,10 @@ class Categories extends StatelessWidget {
                     ),
                   ),
                   decoration: BoxDecoration(
-                      image: DecorationImage(image: AssetImage(imageUrl))),
+                    image: DecorationImage(
+                      image: NetworkImage(category.imageUrl),
+                    ),
+                  ),
                 ),
                 SizedBox(
                   width: 16,

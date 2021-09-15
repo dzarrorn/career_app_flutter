@@ -1,9 +1,13 @@
+import 'package:career_app_flutter/models/user_model.dart';
 import 'package:career_app_flutter/pages/home_page.dart';
 import 'package:career_app_flutter/pages/sign_up_page.dart';
+import 'package:career_app_flutter/providers/auth_provider.dart';
+import 'package:career_app_flutter/providers/user_provider.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:career_app_flutter/theme.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
   @override
@@ -12,10 +16,23 @@ class SignIn extends StatefulWidget {
 
 class _SignInState extends State<SignIn> {
   bool isEmailValid = true;
-
+  bool isLoading = false;
   TextEditingController emailController = TextEditingController(text: '');
+  TextEditingController passwordController = TextEditingController(text: '');
+
   @override
   Widget build(BuildContext context) {
+    var authProvider = Provider.of<AuthProvider>(context);
+    var userProvider = Provider.of<UserProvider>(context);
+    void showError(String message) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(message),
+        ),
+      );
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -121,6 +138,7 @@ class _SignInState extends State<SignIn> {
                     height: 8,
                   ),
                   TextFormField(
+                    controller: passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       fillColor: Color(0xffF1F0F5),
@@ -146,26 +164,50 @@ class _SignInState extends State<SignIn> {
                   Container(
                     width: MediaQuery.of(context).size.width,
                     height: 45,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => HomePage()));
-                      },
-                      child: Text(
-                        'Sign In',
-                        style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white),
-                      ),
-                      style: TextButton.styleFrom(
-                          backgroundColor: Color(0xff4141A4),
-                          side: BorderSide(color: Colors.white),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(66))),
-                    ),
+                    child: isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : TextButton(
+                            onPressed: () async {
+                              if (emailController.text.isEmpty ||
+                                  passwordController.text.isEmpty) {
+                                showError('Please write all fields');
+                              } else {
+                                setState(() {
+                                  isLoading = true;
+                                });
+                                UserModel user = await authProvider.login(
+                                  emailController.text,
+                                  passwordController.text,
+                                );
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                if (user == null) {
+                                  showError('Password or Email Wrong');
+                                } else {
+                                  userProvider.user = user;
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => HomePage()));
+                                }
+                              }
+                            },
+                            child: Text(
+                              'Sign In',
+                              style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white),
+                            ),
+                            style: TextButton.styleFrom(
+                                backgroundColor: Color(0xff4141A4),
+                                side: BorderSide(color: Colors.white),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(66))),
+                          ),
                   ),
                   SizedBox(
                     height: 20,

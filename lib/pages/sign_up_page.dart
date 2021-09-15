@@ -1,9 +1,13 @@
+import 'package:career_app_flutter/models/user_model.dart';
 import 'package:career_app_flutter/pages/home_page.dart';
 import 'package:career_app_flutter/pages/sign_in_page.dart';
+import 'package:career_app_flutter/providers/auth_provider.dart';
+import 'package:career_app_flutter/providers/user_provider.dart';
 import 'package:career_app_flutter/theme.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class SignUp extends StatefulWidget {
   @override
@@ -14,8 +18,23 @@ class _SignUpState extends State<SignUp> {
   bool isEmailValid = true;
   bool isUploaded = false;
   TextEditingController emailController = TextEditingController(text: '');
+  TextEditingController passwordController = TextEditingController(text: '');
+  TextEditingController nameController = TextEditingController(text: '');
+  TextEditingController goalController = TextEditingController(text: '');
+  bool isLoading = false;
+  void showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.red,
+        content: Text(message),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    var authProvider = Provider.of<AuthProvider>(context);
+    var userProvider = Provider.of<UserProvider>(context);
     Widget uploadedImages() {
       return Center(
         child: Column(
@@ -109,6 +128,7 @@ class _SignUpState extends State<SignUp> {
                     height: 8,
                   ),
                   TextFormField(
+                    controller: nameController,
                     decoration: InputDecoration(
                       fillColor: Color(0xffF1F0F5),
                       filled: true,
@@ -186,6 +206,7 @@ class _SignUpState extends State<SignUp> {
                     height: 8,
                   ),
                   TextFormField(
+                    controller: passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       fillColor: Color(0xffF1F0F5),
@@ -218,6 +239,7 @@ class _SignUpState extends State<SignUp> {
                     height: 8,
                   ),
                   TextFormField(
+                    controller: goalController,
                     decoration: InputDecoration(
                       fillColor: Color(0xffF1F0F5),
                       filled: true,
@@ -242,52 +264,59 @@ class _SignUpState extends State<SignUp> {
                   Container(
                     width: MediaQuery.of(context).size.width,
                     height: 45,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => HomePage()));
-                      },
-                      child: Text(
-                        'Sign Up',
-                        style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white),
-                      ),
-                      style: TextButton.styleFrom(
-                          backgroundColor: Color(0xff4141A4),
-                          side: BorderSide(color: Colors.white),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(66))),
-                    ),
+                    child: isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : TextButton(
+                            onPressed: () async {
+                              if (nameController.text.isEmpty ||
+                                  emailController.text.isEmpty ||
+                                  passwordController.text.isEmpty ||
+                                  goalController.text.isEmpty) {
+                                showError('Please write all fields');
+                              } else {
+                                setState(() {
+                                  isLoading = true;
+                                });
+
+                                UserModel user = await authProvider.register(
+                                  emailController.text,
+                                  passwordController.text,
+                                  nameController.text,
+                                  goalController.text,
+                                );
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                if (user == null) {
+                                  showError('Email Registered');
+                                } else {
+                                  userProvider.user = user;
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => HomePage()));
+                                }
+                              }
+                            },
+                            child: Text(
+                              'Sign Up',
+                              style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white),
+                            ),
+                            style: TextButton.styleFrom(
+                                backgroundColor: Color(0xff4141A4),
+                                side: BorderSide(color: Colors.white),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(66))),
+                          ),
                   ),
                   SizedBox(
                     height: 20,
                   ),
-                  // Container(
-                  //   width: MediaQuery.of(context).size.width,
-                  //   height: 45,
-                  //   child: TextButton(
-                  //     onPressed: () {
-                  //       Navigator.push(context,
-                  //           MaterialPageRoute(builder: (context) => SignIn()));
-                  //     },
-                  //     child: Text(
-                  //       'Back to Sign In',
-                  //       style: GoogleFonts.poppins(
-                  //         fontSize: 14,
-                  //         fontWeight: FontWeight.w300,
-                  //         color: Color(0xffB3B5C4),
-                  //       ),
-                  //     ),
-                  //     style: TextButton.styleFrom(
-                  //         side: BorderSide(color: Colors.white),
-                  //         shape: RoundedRectangleBorder(
-                  //             borderRadius: BorderRadius.circular(66))),
-                  //   ),
-                  // ),
                   Center(
                     child: InkWell(
                       onTap: () {
@@ -304,7 +333,7 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                   SizedBox(
-                    height: 35,
+                    height: 50,
                   ),
                 ],
               ),

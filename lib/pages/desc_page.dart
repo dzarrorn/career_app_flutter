@@ -1,8 +1,11 @@
+import 'package:career_app_flutter/models/job_model.dart';
 import 'package:career_app_flutter/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DescPage extends StatefulWidget {
+  final JobModel job;
+  DescPage(this.job);
   @override
   _DescPageState createState() => _DescPageState();
 }
@@ -120,8 +123,9 @@ class _DescPageState extends State<DescPage> {
                         height: 80,
                       ),
                 Center(
-                  child: Image.asset(
-                    'assets/google.png',
+                  child: Image.network(
+                    //! NOTE: Karena stateful widget harus ditambahkan widget.
+                    widget.job.companyLogo,
                     width: 58.63,
                     height: 60,
                   ),
@@ -131,7 +135,7 @@ class _DescPageState extends State<DescPage> {
                 ),
                 Center(
                     child: Text(
-                  'Front-End',
+                  widget.job.name,
                   style: semiBoldBlack.copyWith(
                     fontSize: 20,
                   ),
@@ -141,7 +145,7 @@ class _DescPageState extends State<DescPage> {
                 ),
                 Center(
                   child: Text(
-                    'Google, Inc • Jakarta',
+                    '${widget.job.companyName} • ${widget.job.location}',
                     style: regulerGrey.copyWith(
                       fontSize: 14,
                     ),

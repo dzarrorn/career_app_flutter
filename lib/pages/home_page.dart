@@ -1,13 +1,20 @@
+import 'package:career_app_flutter/models/category_model.dart';
+import 'package:career_app_flutter/models/job_model.dart';
+import 'package:career_app_flutter/providers/category_provider.dart';
+import 'package:career_app_flutter/providers/job_provider.dart';
 import 'package:career_app_flutter/theme.dart';
 import 'package:career_app_flutter/widgets/categories.dart';
 import 'package:career_app_flutter/widgets/header.dart';
 import 'package:career_app_flutter/widgets/posted.dart';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var jobProvider = Provider.of<JobProvider>(context);
+    var categoryProvider = Provider.of<CategoryProvider>(context);
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -68,35 +75,28 @@ class HomePage extends StatelessWidget {
               SizedBox(
                 height: 16,
               ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 24,
-                    ),
-                    Categories(
-                      imageUrl: 'assets/category1.png',
-                      text: 'Website Developer',
-                    ),
-                    Categories(
-                      imageUrl: 'assets/category2.png',
-                      text: 'Mobile Developer',
-                    ),
-                    Categories(
-                      imageUrl: 'assets/category3.png',
-                      text: 'App Designer',
-                    ),
-                    Categories(
-                      imageUrl: 'assets/category4.png',
-                      text: 'Conten Writer',
-                    ),
-                    Categories(
-                      imageUrl: 'assets/category5.png',
-                      text: 'Video Grapher',
-                    ),
-                  ],
-                ),
+              FutureBuilder<List<CategoryModel>>(
+                future: categoryProvider.getCategories(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    int index = -1;
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: snapshot.data.map((category) {
+                          index++;
+                          return Container(
+                            margin: EdgeInsets.only(left: index == 0 ? 24 : 0),
+                            child: Categories(category),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  }
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
               ),
               SizedBox(
                 height: 26,
@@ -112,20 +112,22 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-              Posted(
-                imageUrl: 'assets/google.png',
-                title: 'Front-End Developer',
-                sub: 'Google',
+              SizedBox(
+                height: 5,
               ),
-              Posted(
-                imageUrl: 'assets/instagram.png',
-                title: 'UI Designer',
-                sub: 'Instagram',
-              ),
-              Posted(
-                imageUrl: 'assets/facebook.png',
-                title: 'Data Scientist',
-                sub: 'Facebook',
+              FutureBuilder<List<JobModel>>(
+                future: jobProvider.getJobs(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return Column(
+                      children:
+                          snapshot.data.map((job) => Posted(job)).toList(),
+                    );
+                  }
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
               ),
               SizedBox(
                 height: 50,

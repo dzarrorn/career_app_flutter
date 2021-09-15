@@ -1,16 +1,19 @@
+import 'package:career_app_flutter/models/category_model.dart';
+import 'package:career_app_flutter/models/job_model.dart';
+import 'package:career_app_flutter/providers/job_provider.dart';
 import 'package:career_app_flutter/theme.dart';
 import 'package:career_app_flutter/widgets/posted.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class DetailPage extends StatelessWidget {
-  final String jobDetail;
-  final String imageUrl;
-  DetailPage({
-    this.imageUrl,
-    this.jobDetail,
-  });
+  // final String jobDetail;
+  // final String imageUrl;
+  final CategoryModel category;
+  DetailPage(this.category);
   @override
   Widget build(BuildContext context) {
+    var jobProvider = Provider.of<JobProvider>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -30,8 +33,8 @@ class DetailPage extends StatelessWidget {
                         child: Container(
                           width: MediaQuery.of(context).size.width,
                           height: 270,
-                          child: Image.asset(
-                            imageUrl,
+                          child: Image.network(
+                            category.imageUrl,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -42,7 +45,7 @@ class DetailPage extends StatelessWidget {
                           left: 24,
                         ),
                         child: Text(
-                          jobDetail,
+                          category.name,
                           style: semiBoldWhite.copyWith(
                             fontSize: 24,
                           ),
@@ -76,20 +79,19 @@ class DetailPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Posted(
-                    imageUrl: 'assets/google.png',
-                    title: 'Front-End Developer,',
-                    sub: 'Google',
-                  ),
-                  Posted(
-                    imageUrl: 'assets/instagram.png',
-                    title: 'UI Designer,',
-                    sub: 'Instagram',
-                  ),
-                  Posted(
-                    imageUrl: 'assets/facebook.png',
-                    title: 'Data Scientist,',
-                    sub: 'Facebook',
+                  FutureBuilder<List<JobModel>>(
+                    future: jobProvider.getJobsCategory(category.name),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return Column(
+                          children:
+                              snapshot.data.map((job) => Posted(job)).toList(),
+                        );
+                      }
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
                   ),
                   SizedBox(
                     height: 30.5,
@@ -105,20 +107,19 @@ class DetailPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Posted(
-                    imageUrl: 'assets/google.png',
-                    title: 'Front-End Developer,',
-                    sub: 'Google',
-                  ),
-                  Posted(
-                    imageUrl: 'assets/instagram.png',
-                    title: 'UI Designer,',
-                    sub: 'Instagram',
-                  ),
-                  Posted(
-                    imageUrl: 'assets/facebook.png',
-                    title: 'Data Scientist,',
-                    sub: 'Facebook',
+                  FutureBuilder<List<JobModel>>(
+                    future: jobProvider.getJobs(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return Column(
+                          children:
+                              snapshot.data.map((job) => Posted(job)).toList(),
+                        );
+                      }
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
                   ),
                 ],
               ),
